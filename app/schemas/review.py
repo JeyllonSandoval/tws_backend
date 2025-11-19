@@ -5,11 +5,11 @@ from datetime import datetime
 
 class ReviewBase(BaseModel):
     contact_number: str
-    unique_id: Optional[str] = None
-    user_name: Optional[str] = None
+    user_name: str
     product_name: str
     product_review: str
-
+    preferred_contact_method: Optional[str] = None
+    preferred_contact_again: Optional[bool] = False
 class ReviewCreate(ReviewBase):
     pass
 

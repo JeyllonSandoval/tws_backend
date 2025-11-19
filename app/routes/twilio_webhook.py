@@ -3,8 +3,7 @@ from sqlalchemy.orm import Session
 from twilio.twiml.messaging_response import MessagingResponse
 
 from app.database.database import SessionLocal
-from app.schemas.review import ReviewCreate
-from app.controllers.reviews_crud import create_review
+from app.service.conversation_service import process_message, handle_restart_command
 
 router = APIRouter(prefix="/twilio", tags=["Twilio"])
 
@@ -20,26 +19,21 @@ def get_db():
 async def twilio_webhook(request: Request, db: Session = Depends(get_db)):
     form = await request.form()
 
-    # Datos enviados por Twilio
-    message = form.get("Body")
-    phone = form.get("From")
+    # Data sent by Twilio
+    message = form.get("Body") or ""
+    phone = form.get("From") or ""
 
-    print(f"Mensaje recibido de {phone}: {message}")
+    print(f"Message received from {phone}: {message}")
 
-    # Guardar en la base de datos
-    review_data = ReviewCreate(
-        contact_number=phone,
-        user_name="WhatsApp User",
-        product_name="N/A",
-        product_review=message,
-        preferred_contact_method="whatsapp",
-        preferred_contact_again=False
-    )
+    # Check for restart command (case insensitive)
+    if message.strip().lower() == "restart":
+        response_text = handle_restart_command(db, phone)
+    else:
+        # Process message through conversation flow
+        response_text, is_completed = process_message(db, phone, message)
 
-    created = create_review(db, review_data)
-
-    # Responder a WhatsApp
+    # Respond to WhatsApp
     twilio_resp = MessagingResponse()
-    twilio_resp.message("¡Gracias! Tu mensaje fue recibido y guardado correctamente.")
+    twilio_resp.message(response_text)
 
     return Response(content=str(twilio_resp), media_type="application/xml")

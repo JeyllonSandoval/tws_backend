@@ -1,6 +1,4 @@
-# app/schemas.py
 from pydantic import BaseModel
-from typing import Optional
 from datetime import datetime
 
 class ReviewBase(BaseModel):
@@ -8,14 +6,18 @@ class ReviewBase(BaseModel):
     user_name: str
     product_name: str
     product_review: str
-    preferred_contact_method: Optional[str] = None
-    preferred_contact_again: Optional[bool] = False
+    preferred_contact_method: str | None = None
+    preferred_contact_again: bool = False
+
+
 class ReviewCreate(ReviewBase):
     pass
 
-class ReviewOut(ReviewBase):
-    id: int
+
+class ReviewResponse(ReviewBase):
+    review_id: int
     created_at: datetime
+    updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True

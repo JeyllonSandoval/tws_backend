@@ -15,17 +15,20 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-allowed_origins = os.getenv(
+# Parse allowed origins and strip whitespace
+allowed_origins_str = os.getenv(
     "ALLOWED_ORIGINS",
     "http://localhost:3000,https://tws-project-jssr.vercel.app"
-).split(",")
+)
+allowed_origins = [origin.strip() for origin in allowed_origins_str.split(",") if origin.strip()]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],  # Explicitly allow all methods
     allow_headers=["*"],  # Allows all headers
+    expose_headers=["*"],  # Expose all headers
 )
 
 app.include_router(reviews_router)

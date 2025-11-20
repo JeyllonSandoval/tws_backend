@@ -22,7 +22,13 @@ async def twilio_webhook(request: Request, db: Session = Depends(get_db)):
     # Data sent by Twilio
     message = form.get("Body") or ""
     phone = form.get("From") or ""
-
+    
+    # Normalize phone number: remove 'whatsapp:' prefix if present
+    # Twilio sends numbers as "whatsapp:+1234567890" or just "+1234567890"
+    if phone.lower().startswith("whatsapp:"):
+        phone = phone.replace("whatsapp:", "", 1).replace("WhatsApp:", "", 1).replace("WHATSAPP:", "", 1)
+    phone = phone.strip()
+    
     print(f"Message received from {phone}: {message}")
 
     # Check for restart command (case insensitive)

@@ -7,7 +7,7 @@ from app.controllers.reviews_crud import (
     create_review,
     get_reviews,
     get_review,
-    update_review,
+    update_review as update_review_crud,
     delete_review
 )
 
@@ -41,7 +41,7 @@ def create_new_review(data: ReviewCreate, db: Session = Depends(get_db)):
 
 @router.put("/{review_id}", response_model=ReviewResponse)
 def update_review(review_id: int, data: ReviewCreate, db: Session = Depends(get_db)):
-    updated = update_review(db, review_id, data)
+    updated = update_review_crud(db, review_id, data)
     if not updated:
         raise HTTPException(status_code=404, detail="Review no encontrada")
     return updated
